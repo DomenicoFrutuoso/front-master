@@ -753,7 +753,7 @@ export default function ChatManager({ apiBaseUrl = '', userId, principal: _princ
     if (patientLoading) return
     setPatientError(null)
 
-    const email = patientForm.email.trim()
+    const email = patientForm.email.trim().toLowerCase()
     const password = patientForm.password
 
     if (!email || !password) {

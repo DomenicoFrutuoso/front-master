@@ -64,7 +64,7 @@ export async function POST(request: Request) {
     const res = await backendFetch('/chatbot/cadastro', {
       method: 'POST',
       body: JSON.stringify({
-        email: typeof body.email === 'string' ? body.email.trim() : '',
+        email: typeof body.email === 'string' ? body.email.trim().toLowerCase() : '',
         password: typeof body.password === 'string' ? body.password : '',
         name: typeof body.name === 'string' ? body.name.trim() : undefined,
         phone: typeof body.phone === 'string' ? body.phone.trim() : undefined,

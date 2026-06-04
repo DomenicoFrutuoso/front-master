@@ -28,7 +28,7 @@ export async function POST(request: Request) {
     const res = await backendFetch('/auth/register', {
       method: 'POST',
       body: JSON.stringify({
-        email: body.email.trim(),
+        email: body.email.trim().toLowerCase(),
         password: body.password,
         name: body.name?.trim() || undefined,
         avatarUrl: body.avatarUrl?.trim() || undefined,
