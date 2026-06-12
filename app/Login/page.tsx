@@ -39,8 +39,25 @@ const Container = styled.div`
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
 `;
 
-const FormWrapper = styled.div`
+const BrandPanel = styled.div`
+  width: 45%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: linear-gradient(160deg, #0f172a 0%, #1e3a8a 60%, #2563eb 100%);
+`
+
+const BrandLogo = styled.img`
   width: 100%;
+  max-width: 280px;
+  height: auto;
+  object-fit: contain;
+`
+
+const FormWrapper = styled.div`
+  flex: 1;
   overflow: hidden;
 `;
 
@@ -167,6 +184,9 @@ export default function LoginPage() {
   return (
     <AppWrapper>
       <Container>
+        <BrandPanel>
+          <BrandLogo src="/navoxi-logo.png" alt="Navoxi" />
+        </BrandPanel>
         <FormWrapper>
           <Form 
             onSubmit={handleSubmit} 

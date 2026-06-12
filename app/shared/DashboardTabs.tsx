@@ -77,35 +77,20 @@ const SidebarWrapper = styled.aside<{ $expanded: boolean }>`
 const LogoArea = styled.div`
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
-  padding: 0 16px 20px;
+  padding: 0 12px 20px;
   border-bottom: 1px solid #1e293b;
   margin-bottom: 8px;
   min-height: 48px;
 `
 
-const LogoDot = styled.div`
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: linear-gradient(135deg, #3b82f6, #6366f1);
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  font-weight: 800;
-  font-size: 16px;
-`
-
-const LogoLabel = styled.span<{ $visible: boolean }>`
-  font-size: 14px;
-  font-weight: 700;
-  color: #f1f5f9;
-  white-space: nowrap;
-  opacity: ${p => (p.$visible ? 1 : 0)};
-  transition: opacity 0.15s;
-  ${p => p.$visible && css`animation: ${fadeIn} 0.18s ease;`}
+const LogoImg = styled.img<{ $expanded: boolean }>`
+  height: ${p => (p.$expanded ? '72px' : '40px')};
+  width: auto;
+  object-fit: contain;
+  display: block;
+  transition: height 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 `
 
 const NavList = styled.ul`
@@ -231,8 +216,7 @@ export default function DashboardTabs({ tabs, activeTab, onTabChange, userRole, 
       onMouseLeave={handleMouseLeave}
     >
       <LogoArea>
-        <LogoDot>P</LogoDot>
-        <LogoLabel $visible={expanded}>Painel</LogoLabel>
+        <LogoImg src="/navoxi-logo.png" alt="Navoxi" $expanded={expanded} />
       </LogoArea>
 
       <NavList>
