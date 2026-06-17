@@ -297,11 +297,15 @@ export async function postLogin(credentials: LoginCredentials): Promise<LoginApi
 
 export async function fetchRoomRentals(): Promise<RoomRentalsPayload> {
   const res = await apiRequest('/api/admin/room-rentals', { cache: 'no-store' })
-  const data = (await res.json().catch(() => ({}))) as { error?: string; data?: RoomRentalsPayload }
-  if (!res.ok || !data.data) {
-    throw new Error(data.error ?? 'Erro ao carregar aluguel de salas.')
+  const payload = await parseApiObject(res)
+  if (!res.ok) {
+    throw new Error(extractApiMessage(payload, 'Erro ao carregar aluguel de salas.'))
   }
-  return data.data
+  const data = payload.data as RoomRentalsPayload | undefined
+  if (!data || !Array.isArray(data.rooms) || !Array.isArray(data.leases)) {
+    throw new Error(extractApiMessage(payload, 'Erro ao carregar aluguel de salas.'))
+  }
+  return data
 }
 
 export async function createRoomDefinition(body: Omit<RoomDefinition, 'id'>): Promise<RoomDefinition> {
@@ -312,9 +316,13 @@ export async function createRoomDefinition(body: Omit<RoomDefinition, 'id'>): Pr
       ...body,
     }),
   })
-  const data = (await res.json().catch(() => ({}))) as { error?: string; data?: RoomDefinition }
-  if (!res.ok || !data.data) throw new Error(data.error ?? 'Erro ao criar sala.')
-  return data.data
+  const payload = await parseApiObject(res)
+  if (!res.ok) {
+    throw new Error(extractApiMessage(payload, 'Erro ao criar sala.'))
+  }
+  const data = payload.data as RoomDefinition | undefined
+  if (!data?.id) throw new Error(extractApiMessage(payload, 'Erro ao criar sala.'))
+  return data
 }
 
 export async function createRoomLease(body: Omit<RoomLease, 'id'>): Promise<RoomLease> {
@@ -325,9 +333,13 @@ export async function createRoomLease(body: Omit<RoomLease, 'id'>): Promise<Room
       ...body,
     }),
   })
-  const data = (await res.json().catch(() => ({}))) as { error?: string; data?: RoomLease }
-  if (!res.ok || !data.data) throw new Error(data.error ?? 'Erro ao registrar locação.')
-  return data.data
+  const payload = await parseApiObject(res)
+  if (!res.ok) {
+    throw new Error(extractApiMessage(payload, 'Erro ao registrar locação.'))
+  }
+  const data = payload.data as RoomLease | undefined
+  if (!data?.id) throw new Error(extractApiMessage(payload, 'Erro ao registrar locação.'))
+  return data
 }
 
 export async function updateRoomDefinition(id: string, patch: Partial<RoomDefinition>): Promise<RoomDefinition> {
@@ -335,9 +347,13 @@ export async function updateRoomDefinition(id: string, patch: Partial<RoomDefini
     method: 'PUT',
     body: JSON.stringify(patch),
   })
-  const data = (await res.json().catch(() => ({}))) as { error?: string; data?: RoomDefinition }
-  if (!res.ok || !data.data) throw new Error(data.error ?? 'Erro ao atualizar sala.')
-  return data.data
+  const payload = await parseApiObject(res)
+  if (!res.ok) {
+    throw new Error(extractApiMessage(payload, 'Erro ao atualizar sala.'))
+  }
+  const data = payload.data as RoomDefinition | undefined
+  if (!data?.id) throw new Error(extractApiMessage(payload, 'Erro ao atualizar sala.'))
+  return data
 }
 
 export async function updateRoomLease(id: string, patch: Partial<RoomLease>): Promise<RoomLease> {
@@ -345,9 +361,13 @@ export async function updateRoomLease(id: string, patch: Partial<RoomLease>): Pr
     method: 'PUT',
     body: JSON.stringify(patch),
   })
-  const data = (await res.json().catch(() => ({}))) as { error?: string; data?: RoomLease }
-  if (!res.ok || !data.data) throw new Error(data.error ?? 'Erro ao atualizar locação.')
-  return data.data
+  const payload = await parseApiObject(res)
+  if (!res.ok) {
+    throw new Error(extractApiMessage(payload, 'Erro ao atualizar locação.'))
+  }
+  const data = payload.data as RoomLease | undefined
+  if (!data?.id) throw new Error(extractApiMessage(payload, 'Erro ao atualizar locação.'))
+  return data
 }
 
 export async function deleteRoomDefinition(id: string): Promise<void> {
@@ -355,8 +375,8 @@ export async function deleteRoomDefinition(id: string): Promise<void> {
     method: 'DELETE',
   })
   if (!res.ok) {
-    const data = (await res.json().catch(() => ({}))) as { error?: string }
-    throw new Error(data.error ?? 'Erro ao excluir sala.')
+    const payload = await parseApiObject(res)
+    throw new Error(extractApiMessage(payload, 'Erro ao excluir sala.'))
   }
 }
 
@@ -365,8 +385,8 @@ export async function deleteRoomLease(id: string): Promise<void> {
     method: 'DELETE',
   })
   if (!res.ok) {
-    const data = (await res.json().catch(() => ({}))) as { error?: string }
-    throw new Error(data.error ?? 'Erro ao excluir locação.')
+    const payload = await parseApiObject(res)
+    throw new Error(extractApiMessage(payload, 'Erro ao excluir locação.'))
   }
 }
 

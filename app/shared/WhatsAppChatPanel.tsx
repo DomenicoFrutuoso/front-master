@@ -678,6 +678,20 @@ export default function WhatsAppChatPanel() {
     }
   }, [messages])
 
+  // ─── Mantém contato selecionado sincronizado (nome / última msg) ───
+  useEffect(() => {
+    if (!selectedContact) return
+    const fresh = contacts.find(c => c.id === selectedContact.id)
+    if (!fresh) return
+    if (
+      fresh.name !== selectedContact.name ||
+      fresh.lastMessageAt !== selectedContact.lastMessageAt ||
+      fresh.phoneNumber !== selectedContact.phoneNumber
+    ) {
+      setSelectedContact(fresh)
+    }
+  }, [contacts, selectedContact])
+
   // ─── Poll for new messages ───
   const pollMessages = useCallback(() => {
     if (pollRef.current) clearInterval(pollRef.current)
@@ -685,12 +699,13 @@ export default function WhatsAppChatPanel() {
 
     pollRef.current = setInterval(() => {
       loadMessages({ contactId: selectedContact.id, perPage: 50 })
+      loadContacts(1, 100)
     }, POLL_INTERVAL)
 
     return () => {
       if (pollRef.current) clearInterval(pollRef.current)
     }
-  }, [selectedContact, loadMessages])
+  }, [selectedContact, loadMessages, loadContacts])
 
   useEffect(() => {
     const cleanup = pollMessages()
@@ -738,6 +753,7 @@ export default function WhatsAppChatPanel() {
       try {
         const dataUrl = await readFileAsDataUrl(pendingImage)
         await sendMedia({
+          contactId: selectedContact.id,
           to: selectedContact.phoneNumber,
           type: 'image',
           mediaBase64: dataUrl,
@@ -758,7 +774,7 @@ export default function WhatsAppChatPanel() {
     if (!text.trim()) return
     setSending(true)
     try {
-      await send(selectedContact.phoneNumber, text.trim())
+      await send(selectedContact.phoneNumber, text.trim(), selectedContact.id)
       setText('')
       await loadMessages({ contactId: selectedContact.id, perPage: 50 })
     } catch {

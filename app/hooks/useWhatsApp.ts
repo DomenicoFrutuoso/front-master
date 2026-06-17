@@ -52,10 +52,10 @@ export function useWhatsAppMessages() {
     }
   }, [])
 
-  const send = useCallback(async (to: string, text: string) => {
+  const send = useCallback(async (to: string, text: string, contactId?: number) => {
     setError(null)
     try {
-      await sendWhatsAppText(to, text)
+      await sendWhatsAppText(to, text, contactId)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro ao enviar')
       throw err

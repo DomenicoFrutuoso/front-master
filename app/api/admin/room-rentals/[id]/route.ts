@@ -1,6 +1,10 @@
-import { NextResponse } from 'next/server'
 import { backendFetch, getCookieHeader } from '@/app/lib/backend-server'
 import { requireAdmin } from '@/app/lib/require-admin'
+import {
+  backendUnavailableResponse,
+  forwardProxyResponse,
+  readBackendJson,
+} from '@/app/lib/proxy-backend'
 
 export async function PUT(
   request: Request,
@@ -13,13 +17,17 @@ export async function PUT(
   const kind = new URL(request.url).searchParams.get('kind')
   const body = await request.text()
 
-  const res = await backendFetch(`/admin/room-rentals/${encodeURIComponent(id)}?kind=${kind ?? ''}`, {
-    method: 'PUT',
-    body,
-    forwardCookies: await getCookieHeader(request),
-  })
-  const data = await res.json().catch(() => ({}))
-  return NextResponse.json(data, { status: res.status })
+  try {
+    const res = await backendFetch(`/admin/room-rentals/${encodeURIComponent(id)}?kind=${kind ?? ''}`, {
+      method: 'PUT',
+      body,
+      forwardCookies: await getCookieHeader(request),
+    })
+    const data = await readBackendJson(res)
+    return forwardProxyResponse(data, res.status, 'Erro ao atualizar aluguel de salas.')
+  } catch {
+    return backendUnavailableResponse()
+  }
 }
 
 export async function DELETE(
@@ -32,10 +40,14 @@ export async function DELETE(
   const { id } = await context.params
   const kind = new URL(request.url).searchParams.get('kind')
 
-  const res = await backendFetch(`/admin/room-rentals/${encodeURIComponent(id)}?kind=${kind ?? ''}`, {
-    method: 'DELETE',
-    forwardCookies: await getCookieHeader(request),
-  })
-  const data = await res.json().catch(() => ({}))
-  return NextResponse.json(data, { status: res.status })
+  try {
+    const res = await backendFetch(`/admin/room-rentals/${encodeURIComponent(id)}?kind=${kind ?? ''}`, {
+      method: 'DELETE',
+      forwardCookies: await getCookieHeader(request),
+    })
+    const data = await readBackendJson(res)
+    return forwardProxyResponse(data, res.status, 'Erro ao excluir aluguel de salas.')
+  } catch {
+    return backendUnavailableResponse()
+  }
 }

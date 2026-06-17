@@ -1,7 +1,12 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest } from 'next/server'
 import { backendFetch, getCookieHeader } from '@/app/lib/backend-server'
 import { requireAdmin } from '@/app/lib/require-admin'
 import { requireSuperadmin } from '@/app/lib/require-superadmin'
+import {
+  backendUnavailableResponse,
+  forwardProxyResponse,
+  readBackendJson,
+} from '@/app/lib/proxy-backend'
 
 function normalizeUserPatchBody(raw: string): string {
   try {
@@ -23,10 +28,14 @@ export async function GET(
   const gate = await requireAdmin(req)
   if (!gate.ok) return gate.response
   const { id } = await params
-  const cookies = await getCookieHeader(req)
-  const res = await backendFetch(`/users/${id}`, { forwardCookies: cookies })
-  const data = await res.json()
-  return NextResponse.json(data, { status: res.status })
+  try {
+    const cookies = await getCookieHeader(req)
+    const res = await backendFetch(`/users/${id}`, { forwardCookies: cookies })
+    const data = await readBackendJson(res)
+    return forwardProxyResponse(data, res.status, 'Erro ao buscar usuário.')
+  } catch {
+    return backendUnavailableResponse()
+  }
 }
 
 export async function PATCH(
@@ -38,13 +47,17 @@ export async function PATCH(
   const { id } = await params
   const cookies = await getCookieHeader(req)
   const body = normalizeUserPatchBody(await req.text())
-  const res = await backendFetch(`/users/${id}`, {
-    method: 'PATCH',
-    body,
-    forwardCookies: cookies,
-  })
-  const data = await res.json()
-  return NextResponse.json(data, { status: res.status })
+  try {
+    const res = await backendFetch(`/users/${id}`, {
+      method: 'PATCH',
+      body,
+      forwardCookies: cookies,
+    })
+    const data = await readBackendJson(res)
+    return forwardProxyResponse(data, res.status, 'Erro ao atualizar usuário.')
+  } catch {
+    return backendUnavailableResponse()
+  }
 }
 
 export async function DELETE(
@@ -54,11 +67,15 @@ export async function DELETE(
   const gate = await requireSuperadmin(req)
   if (!gate.ok) return gate.response
   const { id } = await params
-  const cookies = await getCookieHeader(req)
-  const res = await backendFetch(`/users/${id}`, {
-    method: 'DELETE',
-    forwardCookies: cookies,
-  })
-  const data = await res.json()
-  return NextResponse.json(data, { status: res.status })
+  try {
+    const cookies = await getCookieHeader(req)
+    const res = await backendFetch(`/users/${id}`, {
+      method: 'DELETE',
+      forwardCookies: cookies,
+    })
+    const data = await readBackendJson(res)
+    return forwardProxyResponse(data, res.status, 'Erro ao excluir usuário.')
+  } catch {
+    return backendUnavailableResponse()
+  }
 }

@@ -242,76 +242,96 @@ export default function RoomRentalsPanel() {
   const handleCreateRoom = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!roomForm.name.trim()) return
-    await createRoomDefinition({
-      name: roomForm.name.trim(),
-      priceDaily: Number(roomForm.priceDaily) || 0,
-      priceMonthly: Number(roomForm.priceMonthly) || 0,
-      conditions: roomForm.conditions.trim(),
-    })
-    setRoomForm({ name: '', priceDaily: '', priceMonthly: '', conditions: '' })
-    await load()
+    setError(null)
+    try {
+      await createRoomDefinition({
+        name: roomForm.name.trim(),
+        priceDaily: Number(roomForm.priceDaily) || 0,
+        priceMonthly: Number(roomForm.priceMonthly) || 0,
+        conditions: roomForm.conditions.trim(),
+      })
+      setRoomForm({ name: '', priceDaily: '', priceMonthly: '', conditions: '' })
+      await load()
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erro ao criar sala.')
+    }
   }
 
   const handleSaveEditRoom = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingRoom) return
-    await updateRoomDefinition(editingRoom.id, {
-      name: editingRoom.name.trim(),
-      priceDaily: Number(editingRoom.priceDaily),
-      priceMonthly: Number(editingRoom.priceMonthly),
-      conditions: editingRoom.conditions.trim(),
-    })
-    setEditingRoom(null)
-    await load()
+    setError(null)
+    try {
+      await updateRoomDefinition(editingRoom.id, {
+        name: editingRoom.name.trim(),
+        priceDaily: Number(editingRoom.priceDaily),
+        priceMonthly: Number(editingRoom.priceMonthly),
+        conditions: editingRoom.conditions.trim(),
+      })
+      setEditingRoom(null)
+      await load()
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erro ao atualizar sala.')
+    }
   }
 
   const handleCreateLease = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!leaseForm.roomId || !leaseForm.tenantName.trim() || !leaseForm.startDate || !leaseForm.endDate) return
-    await createRoomLease({
-      roomId: leaseForm.roomId,
-      tenantName: leaseForm.tenantName.trim(),
-      tenantEmail: leaseForm.tenantEmail.trim() || undefined,
-      tenantPhone: leaseForm.tenantPhone.trim() || undefined,
-      billingPeriod: leaseForm.billingPeriod,
-      pricePaid: Number(leaseForm.pricePaid) || 0,
-      startDate: leaseForm.startDate,
-      endDate: leaseForm.endDate,
-      inService: leaseForm.inService,
-      notes: leaseForm.notes.trim() || undefined,
-    })
-    setLeaseForm({
-      roomId: '',
-      tenantName: '',
-      tenantEmail: '',
-      tenantPhone: '',
-      billingPeriod: 'daily',
-      pricePaid: '',
-      startDate: '',
-      endDate: '',
-      inService: true,
-      notes: '',
-    })
-    await load()
+    setError(null)
+    try {
+      await createRoomLease({
+        roomId: leaseForm.roomId,
+        tenantName: leaseForm.tenantName.trim(),
+        tenantEmail: leaseForm.tenantEmail.trim() || undefined,
+        tenantPhone: leaseForm.tenantPhone.trim() || undefined,
+        billingPeriod: leaseForm.billingPeriod,
+        pricePaid: Number(leaseForm.pricePaid) || 0,
+        startDate: leaseForm.startDate,
+        endDate: leaseForm.endDate,
+        inService: leaseForm.inService,
+        notes: leaseForm.notes.trim() || undefined,
+      })
+      setLeaseForm({
+        roomId: '',
+        tenantName: '',
+        tenantEmail: '',
+        tenantPhone: '',
+        billingPeriod: 'daily',
+        pricePaid: '',
+        startDate: '',
+        endDate: '',
+        inService: true,
+        notes: '',
+      })
+      await load()
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erro ao registrar locação.')
+    }
   }
 
   const handleSaveEditLease = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingLease) return
-    await updateRoomLease(editingLease.id, {
-      roomId: editingLease.roomId,
-      tenantName: editingLease.tenantName.trim(),
-      tenantEmail: editingLease.tenantEmail?.trim() || undefined,
-      tenantPhone: editingLease.tenantPhone?.trim() || undefined,
-      billingPeriod: editingLease.billingPeriod,
-      pricePaid: Number(editingLease.pricePaid),
-      startDate: editingLease.startDate,
-      endDate: editingLease.endDate,
-      inService: editingLease.inService,
-      notes: editingLease.notes?.trim() || undefined,
-    })
-    setEditingLease(null)
-    await load()
+    setError(null)
+    try {
+      await updateRoomLease(editingLease.id, {
+        roomId: editingLease.roomId,
+        tenantName: editingLease.tenantName.trim(),
+        tenantEmail: editingLease.tenantEmail?.trim() || undefined,
+        tenantPhone: editingLease.tenantPhone?.trim() || undefined,
+        billingPeriod: editingLease.billingPeriod,
+        pricePaid: Number(editingLease.pricePaid),
+        startDate: editingLease.startDate,
+        endDate: editingLease.endDate,
+        inService: editingLease.inService,
+        notes: editingLease.notes?.trim() || undefined,
+      })
+      setEditingLease(null)
+      await load()
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : 'Erro ao atualizar locação.')
+    }
   }
 
   if (loading && !data) {

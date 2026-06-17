@@ -1,35 +1,26 @@
-import { NextResponse } from 'next/server'
 import { backendFetch, getCookieHeader } from '@/app/lib/backend-server'
+import {
+  backendUnavailableResponse,
+  forwardProxyResponse,
+  readBackendJson,
+} from '@/app/lib/proxy-backend'
 
 export async function PUT(
   request: Request,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params
 
   try {
-    const body = await request.json()
-
+    const body = await request.text()
     const res = await backendFetch(`/admin/agendamento/${id}/atualizar`, {
       method: 'PUT',
-      body: JSON.stringify(body),
+      body,
       forwardCookies: await getCookieHeader(request),
     })
-
-    const data = await res.json()
-
-    if (!res.ok) {
-      return NextResponse.json(
-        { status: 'erro', message: data?.message ?? 'Erro ao atualizar' },
-        { status: res.status }
-      )
-    }
-
-    return NextResponse.json(data)
+    const data = await readBackendJson(res)
+    return forwardProxyResponse(data, res.status, 'Erro ao atualizar agendamento.')
   } catch {
-    return NextResponse.json(
-      { status: 'erro', message: 'Falha na comunicação com o servidor.' },
-      { status: 500 }
-    )
+    return backendUnavailableResponse()
   }
 }

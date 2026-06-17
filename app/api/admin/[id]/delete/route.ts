@@ -1,9 +1,13 @@
-import { NextResponse } from 'next/server'
 import { backendFetch, getCookieHeader } from '@/app/lib/backend-server'
+import {
+  backendUnavailableResponse,
+  forwardProxyResponse,
+  readBackendJson,
+} from '@/app/lib/proxy-backend'
 
 export async function DELETE(
   request: Request,
-  context: { params: Promise<{ id: string }> }
+  context: { params: Promise<{ id: string }> },
 ) {
   const { id } = await context.params
 
@@ -12,21 +16,9 @@ export async function DELETE(
       method: 'DELETE',
       forwardCookies: await getCookieHeader(request),
     })
-
-    const data = await res.json()
-
-    if (!res.ok) {
-      return NextResponse.json(
-        { status: 'erro', mensagem: data?.mensagem ?? 'Erro ao excluir' },
-        { status: res.status }
-      )
-    }
-
-    return NextResponse.json(data)
+    const data = await readBackendJson(res)
+    return forwardProxyResponse(data, res.status, 'Erro ao excluir agendamento.')
   } catch {
-    return NextResponse.json(
-      { status: 'erro', mensagem: 'Falha na comunicação com o servidor.' },
-      { status: 500 }
-    )
+    return backendUnavailableResponse()
   }
 }

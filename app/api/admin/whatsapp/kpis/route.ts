@@ -1,9 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { backendFetch, getCookieHeader } from '@/app/lib/backend-server'
+import type { NextRequest } from 'next/server'
+import { proxyWhatsappRoute } from '@/app/lib/whatsapp-proxy'
 
 export async function GET(req: NextRequest) {
-  const cookies = await getCookieHeader(req)
-  const res = await backendFetch('/admin/whatsapp/kpis', { forwardCookies: cookies })
-  const data = await res.json()
-  return NextResponse.json(data, { status: res.status })
+  return proxyWhatsappRoute(req, '/admin/whatsapp/kpis', {}, 'Erro ao carregar KPIs do WhatsApp.')
 }

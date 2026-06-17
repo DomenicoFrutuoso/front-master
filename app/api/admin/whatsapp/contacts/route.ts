@@ -1,22 +1,17 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { backendFetch, getCookieHeader } from '@/app/lib/backend-server'
+import type { NextRequest } from 'next/server'
+import { proxyWhatsappRoute } from '@/app/lib/whatsapp-proxy'
 
 export async function GET(req: NextRequest) {
-  const cookies = await getCookieHeader(req)
   const qs = req.nextUrl.searchParams.toString()
-  const res = await backendFetch(`/admin/whatsapp/contacts?${qs}`, { forwardCookies: cookies })
-  const data = await res.json()
-  return NextResponse.json(data, { status: res.status })
+  return proxyWhatsappRoute(req, `/admin/whatsapp/contacts?${qs}`, {}, 'Erro ao listar contatos.')
 }
 
 export async function POST(req: NextRequest) {
-  const cookies = await getCookieHeader(req)
   const body = await req.text()
-  const res = await backendFetch('/admin/whatsapp/contacts', {
-    method: 'POST',
-    body,
-    forwardCookies: cookies,
-  })
-  const data = await res.json()
-  return NextResponse.json(data, { status: res.status })
+  return proxyWhatsappRoute(
+    req,
+    '/admin/whatsapp/contacts',
+    { method: 'POST', body },
+    'Erro ao salvar contato.',
+  )
 }

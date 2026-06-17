@@ -16,6 +16,7 @@ export interface WhatsAppConfig {
 export interface WhatsAppContact {
   id: number
   phoneNumber: string
+  whatsAppJid?: string | null
   name: string
   profilePicUrl?: string
   isBlocked: boolean

@@ -1,29 +1,22 @@
-import { NextResponse } from 'next/server'
 import { backendFetch, getCookieHeader } from '@/app/lib/backend-server'
+import {
+  backendUnavailableResponse,
+  forwardProxyResponse,
+  readBackendJson,
+} from '@/app/lib/proxy-backend'
 
 /** Proxy para POST /admin/agendamento/chatbot/search (backend-edge-main). */
 export async function POST(request: Request) {
   try {
-    const body = await request.json().catch(() => ({}))
+    const body = await request.text()
     const res = await backendFetch('/admin/agendamento/chatbot/search', {
       method: 'POST',
-      body: JSON.stringify(body),
+      body,
       forwardCookies: await getCookieHeader(request),
     })
-    const data = await res.json()
-
-    if (!res.ok) {
-      return NextResponse.json(
-        { status: 'erro', mensagem: data?.mensagem ?? 'Erro na busca do chatbot' },
-        { status: res.status },
-      )
-    }
-
-    return NextResponse.json(data)
+    const data = await readBackendJson(res)
+    return forwardProxyResponse(data, res.status, 'Erro na busca do chatbot.')
   } catch {
-    return NextResponse.json(
-      { status: 'erro', mensagem: 'Falha na comunicação com o servidor.' },
-      { status: 500 },
-    )
+    return backendUnavailableResponse()
   }
 }

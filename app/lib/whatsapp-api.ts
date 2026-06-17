@@ -76,10 +76,14 @@ export async function fetchWhatsAppMessages(params?: {
   return { data: json.data, total: json.total, page: json.page, pages: json.pages }
 }
 
-export async function sendWhatsAppText(to: string, text: string) {
+export async function sendWhatsAppText(to: string, text: string, contactId?: number) {
   const res = await apiRequest('/api/admin/whatsapp/messages/send-text', {
     method: 'POST',
-    body: JSON.stringify({ to, text }),
+    body: JSON.stringify({
+      to,
+      text,
+      ...(contactId != null ? { contactId } : {}),
+    }),
   })
   const data = await res.json()
   if (!res.ok) throw new Error(data.message ?? 'Erro ao enviar mensagem')
@@ -110,6 +114,7 @@ function errorFromWhatsAppJson(data: Record<string, unknown>): string {
 }
 
 export async function sendWhatsAppMedia(body: {
+  contactId?: number
   to: string
   type: 'image' | 'document' | 'audio' | 'video'
   mediaUrl?: string

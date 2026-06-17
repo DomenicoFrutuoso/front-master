@@ -1,7 +1,10 @@
-import { NextResponse } from 'next/server'
 import { backendFetch, getCookieHeader } from '@/app/lib/backend-server'
+import {
+  backendUnavailableResponse,
+  forwardProxyResponse,
+  readBackendJson,
+} from '@/app/lib/proxy-backend'
 
-/** Lista cadastros feitos pelo chatbot (admin). */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -9,18 +12,9 @@ export async function GET(request: Request) {
     const res = await backendFetch(`/admin/chatbot-cadastros?limit=${encodeURIComponent(limit)}`, {
       forwardCookies: await getCookieHeader(request),
     })
-    const data = await res.json().catch(() => ({}))
-    if (!res.ok) {
-      return NextResponse.json(
-        { status: 'erro', mensagem: data?.mensagem ?? 'Erro ao listar cadastros' },
-        { status: res.status }
-      )
-    }
-    return NextResponse.json(data)
+    const data = await readBackendJson(res)
+    return forwardProxyResponse(data, res.status, 'Erro ao listar cadastros.')
   } catch {
-    return NextResponse.json(
-      { status: 'erro', mensagem: 'Falha na comunicação com o servidor.' },
-      { status: 500 }
-    )
+    return backendUnavailableResponse()
   }
 }
