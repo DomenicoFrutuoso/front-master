@@ -4,7 +4,7 @@ export type UserRoleUpdateInput = {
   name?: string
   role?: string
   email?: string
-  is_active?: boolean
+  isActive?: boolean
 }
 
 export async function fetchUsersList(): Promise<unknown[]> {

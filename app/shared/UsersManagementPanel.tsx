@@ -244,7 +244,7 @@ export default function UsersManagementPanel({
         name: draft.name.trim() || undefined,
         role: draft.role || undefined,
         email: draft.email.trim() || undefined,
-        is_active: draft.isActive,
+        isActive: draft.isActive,
       })
       setEditId(null)
       await load()
