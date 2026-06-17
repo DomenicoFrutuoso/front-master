@@ -7,9 +7,10 @@ Este repositório é o painel Next.js. O backend é o NestJS do link acima; junt
 ### Backend (Nest)
 
 1. Clone [backend-edge-main](https://github.com/GustavoDomenico-CD/backend-edge-main).
-2. Copie `.env.example` para `.env`, ajuste `DATABASE_URL` / `JWT_SECRET` se precisar.
+2. Copie `.env.example` para `.env`, ajuste `DATABASE_URL` (PostgreSQL) e `JWT_SECRET` se precisar.
 3. Defina `FRONTEND_URL=http://localhost:3000` no `.env` do backend para CORS com cookies em desenvolvimento.
-4. `npx prisma migrate dev` (se necessário), depois `npm run start:dev` (porta padrão **3001**).
+4. Suba PostgreSQL local (`docker run -d -p 5432:5432 -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=navoxi postgres:16`) ou use Railway.
+5. `npx prisma db push` (sincroniza schema), depois `npm run start:dev` (porta padrão **3001**).
 
 ### Front (este repo)
 
@@ -59,3 +60,12 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
 
 Em produção, configure `BACKEND_URL` no ambiente do Next com a URL HTTPS da API e no backend `FRONTEND_URL` com a origem exata do site (CORS).
+
+### Banco de dados (PostgreSQL no Railway)
+
+O backend persiste **usuários, agendamentos, salas, WhatsApp, chatbot** no PostgreSQL. Salas deixaram de usar arquivo local no front (`data/room-rentals.json`).
+
+1. No Railway: adicione **PostgreSQL** ao projeto e copie `DATABASE_URL` para o serviço do backend.
+2. Rode `./scripts/setup-railway-postgres.sh` no repositório `backend-edge-main` (requer `railway login`).
+3. Deploy do backend — o `railway.toml` executa `prisma db push` automaticamente.
+4. No Vercel: `BACKEND_URL` = URL do backend Railway.

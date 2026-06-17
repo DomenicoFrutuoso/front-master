@@ -112,7 +112,11 @@ export function extractApiMessage(
   payload: Record<string, unknown>,
   fallback: string
 ): string {
-  if (typeof payload.message === 'string' && payload.message.trim()) return payload.message
+  const message = payload.message
+  if (typeof message === 'string' && message.trim()) return message
+  if (Array.isArray(message) && message.length > 0) {
+    return message.map(String).join(' ')
+  }
   if (typeof payload.mensagem === 'string' && payload.mensagem.trim()) return payload.mensagem
   if (typeof payload.error === 'string' && payload.error.trim()) return payload.error
   return fallback
